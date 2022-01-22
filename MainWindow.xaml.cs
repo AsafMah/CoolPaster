@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using System.Windows.Input;
 using Newtonsoft.Json;
 using NHotkey;
@@ -96,29 +97,28 @@ public partial class MainWindow : Window
     {
         Clipboard.SetText(TxtPreview.Text);
         Hide();
-        Thread.Sleep(100);
-        SendCtrlV();
-    }
-    public static void Send(Key key)
-    {
-        if (Keyboard.PrimaryDevice == null)
+        if (((Keyboard.Modifiers & ModifierKeys.Control) != 0))
         {
-            return;
+            SendCtrlV();
         }
-
-        if (Keyboard.PrimaryDevice.ActiveSource == null)
-        {
-            return;
-        }
-
-        var e1 = new KeyEventArgs(Keyboard.PrimaryDevice, Keyboard.PrimaryDevice.ActiveSource, 0, key) { RoutedEvent = Keyboard.PreviewKeyDownEvent };
-        InputManager.Current.ProcessInput(e1);
     }
     
+    [DllImport("user32.dll", SetLastError = true)]
+    public static extern IntPtr SendMessage(
+        IntPtr hWnd, 
+        uint Msg, 
+        UIntPtr wParam, 
+        IntPtr lParam
+    );
+    
+    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+    static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll", SetLastError=true)]
+    static extern bool BringWindowToTop(IntPtr hWnd);
     private void SendCtrlV()
     {
-        //Send(Key.LeftCtrl);
-        Send(Key.V);
+        SendKeys.SendWait("^v");
     }
     private void LstActionsOnSelectionChanged(string? item)
     {

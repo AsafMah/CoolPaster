@@ -27,7 +27,9 @@ public partial class MainWindow : Window
     {
         Prettify,
         Escape,
-        Unescape
+        Unescape,
+        EscapeQuotes,
+        UnescapeTrim
     }
     
     public MainWindow()
@@ -83,10 +85,13 @@ public partial class MainWindow : Window
         
         KeyDown += (o, e) =>
         {
-            if (e.Key == Key.Enter)
+            var isBox = Equals(Keyboard.FocusedElement, TxtClipboard);
+            if (e.Key == Key.Enter && (!isBox || (Keyboard.Modifiers & ModifierKeys.Shift) != 0))
             {
                 DoAction();
+                return;
             }
+            
         };
         LstActions.MouseDoubleClick += (o, e) => DoAction();
         
@@ -97,7 +102,7 @@ public partial class MainWindow : Window
     {
         Clipboard.SetText(TxtPreview.Text);
         Hide();
-        if (((Keyboard.Modifiers & ModifierKeys.Control) != 0))
+        if (((Keyboard.Modifiers & ModifierKeys.Control) == 0))
         {
             SendCtrlV();
         }
@@ -117,8 +122,10 @@ public partial class MainWindow : Window
         var txt = CurrentClipboard;
         var previewTxt = Enum.Parse<Actions>(item) switch {
             Actions.Prettify => Prettify(txt),
-            Actions.Escape => txt + "weW",
-            Actions.Unescape => txt + "lad",
+            Actions.Escape => EscapeCsharp.Escape(txt, EscapeCsharp.LiteralType.Regular),
+            Actions.EscapeQuotes => $"\"{EscapeCsharp.Escape(txt, EscapeCsharp.LiteralType.Regular)}\"",
+            Actions.Unescape => UnescapeCsharp.Unescape(txt, UnescapeCsharp.LiteralType.Regular),
+            Actions.UnescapeTrim => UnescapeCsharp.Unescape(txt, UnescapeCsharp.LiteralType.Regular).Trim(' ', '\t', '\r', '\n', '"'),
             _ => throw new ArgumentOutOfRangeException()
         };
 

@@ -101,21 +101,8 @@ public partial class MainWindow : Window
         {
             SendCtrlV();
         }
-    }
-    
-    [DllImport("user32.dll", SetLastError = true)]
-    public static extern IntPtr SendMessage(
-        IntPtr hWnd, 
-        uint Msg, 
-        UIntPtr wParam, 
-        IntPtr lParam
-    );
-    
-    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    static extern IntPtr GetForegroundWindow();
+    } 
 
-    [DllImport("user32.dll", SetLastError=true)]
-    static extern bool BringWindowToTop(IntPtr hWnd);
     private void SendCtrlV()
     {
         SendKeys.SendWait("^v");
